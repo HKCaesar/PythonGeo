@@ -2,7 +2,7 @@ import numpy as np
 import tifffile as tiff
 import matplotlib.pyplot as plt
 
-p_0_0 = tiff.imread("..\\..\\Data\\three_band\\6010_0_0.tif")
+p_0_0 = tiff.imread("..\\..\\Data\\three_band\\6100_1_3.tif")
 p_0_1 = tiff.imread("..\\..\\Data\\three_band\\6010_0_1.tif")
 
 plt.imshow(np.transpose(p_0_0, (1, 2, 0)), cmap = 'coolwarm')

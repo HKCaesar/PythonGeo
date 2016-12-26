@@ -270,4 +270,18 @@ for imageId in trainImageIds:
 # My code
 testId = '6100_1_3'
 df[df.ImageId == testId]
+gs[gs.ImageId == testId]
 pp = wkt_loads(df[df.ImageId == testId].MultipolygonWKT.values[0])
+fig, axArr = plt.subplots(figsize=(20, 20))
+for polygon in pp:
+    mpl_poly = PolygonPatch(polygon,
+                color='0.7',
+                lw=0,
+                alpha=0.7,
+                zorder=1)
+    axArr.add_patch(mpl_poly)
+
+axArr.autoscale_view()
+axArr.set_title('Objects')
+axArr.set_xticks([])
+axArr.set_yticks([])
