@@ -256,10 +256,15 @@ def visualize_image(imageId, plot_all=True):
     return (fig, axArr, ax)
 
 # Loop over few training images and save to files
-for imageId in trainImageIds:
-    fig, axArr, ax = visualize_image(imageId, plot_all=False)
-    plt.savefig('Objects--' + imageId + '.png')
-    plt.clf()
+def visualizeAll():
+    for imageId in trainImageIds:
+        fig, axArr, ax = visualize_image(imageId, plot_all=False)
+        plt.savefig('Objects--' + imageId + '.png')
+        plt.clf()
+
+def makeClassMap(imageId, nClass):
+    poly = wkt_loads(df[df.ImageId == imageId].MultipolygonWKT.values[nClass])
+    (xmax, ymin, W, H) = get_size(imageId)
 
 
 # Optionally, view images immediately:
@@ -271,7 +276,7 @@ for imageId in trainImageIds:
 testId = '6100_1_3'
 df[df.ImageId == testId]
 gs[gs.ImageId == testId]
-pp = wkt_loads(df[df.ImageId == testId].MultipolygonWKT.values[0])
+pp = wkt_loads(df[df.ImageId == testId].MultipolygonWKT.values[1])
 fig, axArr = plt.subplots(figsize=(20, 20))
 for polygon in pp:
     mpl_poly = PolygonPatch(polygon,

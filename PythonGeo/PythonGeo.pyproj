@@ -26,6 +26,10 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DataTools.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="export-mask.py" />
     <Compile Include="Sandbox.py">
       <SubType>Code</SubType>
     </Compile>
