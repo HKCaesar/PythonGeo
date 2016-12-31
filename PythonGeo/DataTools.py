@@ -36,27 +36,16 @@ CLASSES = {
         9 : 'Truck',
         10 : 'Car',
         }
-COLORS = {
-        1 : '0.7',
-        2 : '0.4',
-        3 : '#b35806',
-        4 : '#dfc27d',
-        5 : '#1b7837',
-        6 : '#a6dba0',
-        7 : '#74add1',
-        8 : '#4575b4',
-        9 : '#f46d43',
-        10: '#d73027',
-        }
+
 ZORDER = {
-        1 : 5,
-        2 : 5,
-        3 : 4,
-        4 : 1,
-        5 : 3,
-        6 : 2,
-        7 : 7,
-        8 : 8,
+        1 : 8,
+        2 : 7,
+        3 : 6,
+        4 : 5,
+        5 : 4,
+        6 : 3,
+        7 : 1,
+        8 : 2,
         9 : 9,
         10: 10,
         }
@@ -173,12 +162,40 @@ def plotMask(W, H, contours, fillValue):
 
     return img_mask
 
-def makeClassMask(imageId, nClass):
-    (xmax, ymin, W, H) = get_size(imageId)
-    polygonList = wkt_loads(df[df.ImageId == imageId].MultipolygonWKT.values[nClass])
+def plotPolygons(imageId, nClass, xmax, ymin, W, H, fillValue):
+    polygonList = wkt_loads(df[(df.ImageId == imageId) & (df.ClassType == nClass)].MultipolygonWKT.values[0])
 
     (perimeters, interiors) = getPolygonContours(polygonList, xmax, ymin, W, H)
 
-    mask = plotMask(W, H, (perimeters, interiors), 1)
+    mask = plotMask(W, H, (perimeters, interiors), fillValue)
 
     return mask
+
+def makeClassMask(imageId, nClass, fillValue):
+    (xmax, ymin, W, H) = get_size(imageId)
+    
+    return plotPolygons(imageId, nClass, xmax, ymin, W, H, fillValue)
+
+def makeCombinedMask(imageId):
+    (xmax, ymin, W, H) = get_size(imageId)
+
+    layers = np.zeros((H, W, len(CLASSES)))
+
+    for nClass in CLASSES.keys():
+        layers[:,:,(nClass-1)] = makeClassMask(imageId, nClass, ZORDER[nClass])
+
+    combinedMask = np.amax(layers, axis=2)
+
+    return combinedMask
+
+# Expiriment
+testId = '6100_1_3'
+#df[(df.ImageId == testId) & (df.ClassType == 1)]
+#class1Mask = makeClassMask(testId, 1, 1)
+#class2Mask = makeClassMask(testId, 2, 2)
+
+#cmb = np.zeros(class1Mask.shape + (2,))
+#cmb[:,:,0] = class1Mask
+#cmb[:,:,1] = class2Mask
+
+cm = makeCombinedMask(testId)
