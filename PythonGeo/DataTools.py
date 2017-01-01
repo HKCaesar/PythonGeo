@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 
 from os.path import join, exists
+from os import makedirs
 
 from shapely.wkt import loads as wkt_loads
 from matplotlib.patches import Polygon, Patch
@@ -184,11 +185,34 @@ def makeCombinedMask(imageId):
     for nClass in CLASSES.keys():
         layers[:,:,(nClass-1)] = makeClassMask(imageId, nClass, ZORDER[nClass])
 
-    combinedMask = np.amax(layers, axis=2)
+    combinedMask = np.amax(layers, axis=2).astype(np.int8)
 
     return combinedMask
 
-# Expiriment
+processedDir = join(inDir, "three_band_processed")
+def processImage(imageId):
+    combinedMask = makeCombinedMask(imageId)
+    destDir = processedDir
+    if not exists(destDir):
+        makedirs(destDir)
+
+    destFileNpy = join(processedDir, "{0}.npy".format(imageId))
+    destFilePng = join(processedDir, "{0}.png".format(imageId))
+    np.save(destFileNpy, combinedMask)
+    plt.imsave(destFilePng, combinedMask)
+
+def loadAll(imageId):
+    npyFile = join(processedDir, "{0}.npy".format(imageId))
+    if not exists(npyFile):
+        processImage(imageId)
+    mask = np.load(npyFile)
+
+    rawImage = get_images(imageId, '3')['3']
+    axesCorrectedImage = np.transpose(p_0_0, (1, 2, 0))
+
+    return (axesCorrectedImage, mask)
+
+# Experiment
 testId = '6100_1_3'
 #df[(df.ImageId == testId) & (df.ClassType == 1)]
 #class1Mask = makeClassMask(testId, 1, 1)
@@ -199,3 +223,5 @@ testId = '6100_1_3'
 #cmb[:,:,1] = class2Mask
 
 cm = makeCombinedMask(testId)
+
+(img, mask) = loadAll(testId)
