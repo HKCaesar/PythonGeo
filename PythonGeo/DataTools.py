@@ -208,12 +208,12 @@ def loadAll(imageId):
     mask = np.load(npyFile)
 
     rawImage = get_images(imageId, '3')['3']
-    axesCorrectedImage = np.transpose(p_0_0, (1, 2, 0))
+    axesCorrectedImage = np.transpose(rawImage, (1, 2, 0))
 
     return (axesCorrectedImage, mask)
 
 # Experiment
-testId = '6100_1_3'
+#testId = '6100_1_3'
 #df[(df.ImageId == testId) & (df.ClassType == 1)]
 #class1Mask = makeClassMask(testId, 1, 1)
 #class2Mask = makeClassMask(testId, 2, 2)
@@ -222,6 +222,6 @@ testId = '6100_1_3'
 #cmb[:,:,0] = class1Mask
 #cmb[:,:,1] = class2Mask
 
-cm = makeCombinedMask(testId)
+#cm = makeCombinedMask(testId)
 
-(img, mask) = loadAll(testId)
+#(img, mask) = loadAll(testId)

@@ -21,3 +21,13 @@ plt.imshow(np.transpose(p_0_1, (1, 2, 0)))
 p = np.hstack((np.transpose(p_0_0, (1, 2, 0)), np.transpose(p_0_1, (1, 2, 0))))
 plt.imshow(p)
 tiff.imshow(p)
+
+import numpy as np
+import tifffile as tiff
+import matplotlib.pyplot as plt
+import cv2
+
+import DataTools
+
+testId = '6100_1_3'
+(img, mask) = DataTools.loadAll(testId)

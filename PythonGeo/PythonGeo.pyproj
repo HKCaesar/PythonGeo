@@ -30,6 +30,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="export-mask.py" />
+    <Compile Include="ImageUtils.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sandbox.py">
       <SubType>Code</SubType>
     </Compile>
