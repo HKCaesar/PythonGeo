@@ -31,3 +31,11 @@ import DataTools
 
 testId = '6100_1_3'
 (img, mask) = DataTools.loadAll(testId)
+
+gall = genPatches(img.shape[:2], (100, 100), 10)
+gg = itertools.islice(gall, 20)
+ds = prepareDataSetFromPatches(gg, img)
+
+gall = genPatches(img.shape[:2], (100, 100), 10)
+gg = itertools.islice(gall, 20)
+ms = prepareDataSetFromPatches(gg, mask.reshape(mask.shape + (1,)))
