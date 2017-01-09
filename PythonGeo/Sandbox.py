@@ -32,10 +32,17 @@ import DataTools
 testId = '6100_1_3'
 (img, mask) = DataTools.loadAll(testId)
 
-gall = genPatches(img.shape[:2], (100, 100), 10)
+gall = genPatches(img.shape[1:], (100, 100), 10)
 gg = itertools.islice(gall, 20)
-ds = prepareDataSetFromPatches(gg, img)
+ds = prepareDataSetFromPatches(gg, img, lambda x: True)
 
-gall = genPatches(img.shape[:2], (100, 100), 10)
+gall = genPatches(img.shape[1:], (100, 100), 10)
 gg = itertools.islice(gall, 20)
-ms = prepareDataSetFromPatches(gg, mask.reshape(mask.shape + (1,)))
+ms = prepareDataSetFromPatches(gg, mask.reshape(mask.shape + (1,)), lambda x: True)
+
+gall = genPatches(img.shape[1:], (100, 100), 10)
+gg = itertools.islice(gall, 20)
+(imgs, classes, masks) = prepareDataSets(gg, img, mask)
+
+def showImg(img):
+    plt.imshow(np.transpose(img, (1, 2, 0)))

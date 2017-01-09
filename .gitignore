@@ -243,3 +243,5 @@ ModelManifest.xml
 *.png
 *.npy
 *.hdf5
+*.pyc
+_pycache_

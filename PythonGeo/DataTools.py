@@ -208,7 +208,7 @@ def loadAll(imageId):
     mask = np.load(npyFile)
 
     rawImage = get_images(imageId, '3')['3']
-    axesCorrectedImage = np.transpose(rawImage, (1, 2, 0))
+    axesCorrectedImage = rawImage #np.transpose(rawImage, (1, 2, 0))
 
     return (axesCorrectedImage, mask)
 
