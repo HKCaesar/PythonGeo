@@ -24,11 +24,11 @@ def genPatches(imgShape, patchShape, stride):
 
         startX += stride
 
-        if startX + patchW > imgW:
+        if startX + patchW >= imgW:
             startX = 0
             startY += stride
 
-        if startY + patchH > imgH:
+        if startY + patchH >= imgH:
             break
 
 def cutPatch(patch, imageData):
@@ -45,9 +45,6 @@ def cutPatch(patch, imageData):
         img = imageData[startY:(startY+patchH), startX:(startX+patchW)]
     else:
         img = imageData[:, startY:(startY+patchH), startX:(startX+patchW)]
-
-    if len(img.shape) == 2 and img.shape != (100, 100):
-        print(patch, img.shape)
 
     return img
 

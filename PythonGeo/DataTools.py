@@ -113,7 +113,7 @@ def get_size(imageId):
         imageId as used in grid_size.csv
     """
     xmax, ymin = gs[gs.ImageId == imageId].iloc[0,1:].astype(float)
-    W, H = get_images(imageId, '3')['3'].shape[1:]
+    H, W = get_images(imageId, '3')['3'].shape[1:]
     return (xmax, ymin, W, H)
 
 def is_training_image(imageId):
