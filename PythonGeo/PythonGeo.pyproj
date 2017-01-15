@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>1ec35229-fae7-47e3-8d20-e62946916e0b</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>ImageUtils.py</StartupFile>
+    <StartupFile>Sandbox.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -34,6 +34,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Sandbox.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SetEnvForGpu.py" />
+    <Compile Include="SimpleNet.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SimpleNetworkTest.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="VisualizeKernel.py" />

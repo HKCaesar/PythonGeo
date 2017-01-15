@@ -40,9 +40,23 @@ gall = genPatches(img.shape[1:], (100, 100), 10)
 gg = itertools.islice(gall, 20)
 ms = prepareDataSetFromPatches(gg, mask.reshape(mask.shape + (1,)), lambda x: True)
 
-gall = genPatches(img.shape[1:], (101, 101), 10)
-gg = itertools.islice(gall, 20)
-(imgs, classes, masks) = prepareDataSets(gall, img, mask)
+gall = genPatches(img.shape[1:], (501, 501), 10)
+gg = itertools.islice(gall, 50)
+(imgs, classes, masks) = prepareDataSets(gg, img, mask)
 
 def showImg(img):
     plt.imshow(np.transpose(img, (1, 2, 0)))
+
+
+import numpy as np
+import tifffile as tiff
+import matplotlib.pyplot as plt
+import cv2
+import sklearn.preprocessing as prc
+
+import DataTools
+
+testId = '6100_1_3'
+(img, mask) = DataTools.loadAll(testId)
+img_f = img.astype(float)
+img_s = prc.scale(img_f.reshape(-1, 1)).reshape(img.shape)

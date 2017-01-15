@@ -84,7 +84,7 @@ def prepareDataSets(patchesGen, imageData, mapData):
 
     return (stackedImgList, stackedMapList, stackedMapDetailList)
 
-testId = '6100_1_3'
-(img, mask) = DataTools.loadAll(testId)
-gall = genPatches(img.shape[1:], (100, 100), 10)
-(imgs, classes, masks) = prepareDataSets(gall, img, mask)
+#testId = '6100_1_3'
+#(img, mask) = DataTools.loadAll(testId)
+#gall = genPatches(img.shape[1:], (100, 100), 10)
+#(imgs, classes, masks) = prepareDataSets(gall, img, mask)
