@@ -245,4 +245,5 @@ ModelManifest.xml
 *.hdf5
 *.pyc
 _pycache_
+__pycache__
 *.bin
