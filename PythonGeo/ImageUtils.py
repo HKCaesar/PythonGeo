@@ -31,6 +31,23 @@ def genPatches(imgShape, patchShape, stride):
         if startY + patchH >= imgH:
             break
 
+def lenInPatches(imgShape, patchShape, stride):
+    (imgH, imgW) = imgShape
+    (patchH, patchW) = patchShape
+    (startY, startX) = (0, 0)
+
+    count = 0
+    while True:
+
+        startX += stride
+        count += 1
+
+        if startX + patchW >= imgW:
+            return count
+
+    return count
+
+
 def cutPatch(patch, imageData):
     (startY, startX, patchH, patchW) = patch
     
@@ -70,11 +87,11 @@ def prepareDataSets(patchesGen, imageData, mapData):
         (patchY, patchX) = patchMap.shape
         patchCentralPoint = patchMap[patchY//2, patchX//2]
 
-        if not patchCentralPoint == 0:
-            imgList.append(patchImg)
-            mapList.append(patchCentralPoint)
-            mapDetailList.append(patchMap)
-            n += 1
+        #if not patchCentralPoint == 0:
+        imgList.append(patchImg)
+        mapList.append(patchCentralPoint)
+        mapDetailList.append(patchMap)
+        n += 1
 
     stackedImgList = np.stack(imgList)
     #stackedImgList = stackedImgList.reshape((n, stackedImgList.shape[0]//n) + stackedImgList.shape[1:])
