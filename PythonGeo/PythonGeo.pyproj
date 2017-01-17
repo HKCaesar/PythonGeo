@@ -33,6 +33,9 @@
     <Compile Include="ImageUtils.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Models.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sandbox.py">
       <SubType>Code</SubType>
     </Compile>
@@ -41,6 +44,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SimpleNetworkTest.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UNetTest.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="VisualizeKernel.py" />
