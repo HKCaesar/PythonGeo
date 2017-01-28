@@ -50,7 +50,7 @@ y_train_cat = y_train_cat.reshape((y_train.shape[0], y_train.shape[1]*y_train.sh
 #model.fit(x_train, y_train_cat, nb_epoch=15, batch_size=11)
 
 # For GNet
-model.fit(x_train, y_train_cat, nb_epoch=5, batch_size=4)
+model.fit(x_train, y_train_cat, nb_epoch=10, batch_size=4)
 
 #trainBatchSize = 10
 #idx = 0
@@ -71,7 +71,42 @@ y_cv_cat = y_cv_cat.reshape((y_cv.shape[0], y_cv.shape[1]*y_cv.shape[2], nb_clas
 
 rez = model.predict(x_cv)
 rez1 = np.array(rez)
-rez1[:,:,0:1] *= 0.08
+rez1[:,:,0:1] *= 0.1
 #rez1[:,:,0:1] = 0
 xx = np.argmax(rez1, axis = 2)
 xx = xx.reshape((-1, img_dim_y, img_dim_x))
+
+
+gall_t = ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), img_dim_x)
+(imgs_t, classes_t, masks_t) = ImageUtils.prepareDataSets(gall_t, img, mask)
+coords = [x for x in ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), img_dim_x)]
+all_rez = model.predict(imgs_t, batch_size=4)
+rez1 = np.array(all_rez)
+rez1[:,:,0:1] *= 0.1
+xx = np.argmax(rez1, axis = 2)
+xx = xx.reshape((-1, img_dim_y, img_dim_x))
+
+mask_rez = np.zeros(img.shape[1:])
+
+for i in range(len(coords)):
+    (y, x, h, w) = coords[i]
+    mask_rez[y:(y+h), x:(x+h)] = xx[i]
+
+def getImageMask(img, model):
+    gall_t = ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), img_dim_x)
+    (imgs_t, classes_t, masks_t) = ImageUtils.prepareDataSets(gall_t, img, mask)
+    coords = [x for x in ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), img_dim_x)]
+    all_rez = model.predict(imgs_t, batch_size=4)
+
+    rez1 = np.array(all_rez)
+    rez1[:,:,0:1] *= 0.1
+    rez_img = np.argmax(rez1, axis = 2)
+    rez_img = rez_img.reshape((-1, img_dim_y, img_dim_x))
+
+    mask_rez = np.zeros(img.shape[1:])
+
+    for i in range(len(coords)):
+        (y, x, h, w) = coords[i]
+        mask_rez[y:(y+h), x:(x+h)] = rez_img[i]
+
+    return mask_rez

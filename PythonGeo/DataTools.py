@@ -164,11 +164,14 @@ def plotMask(W, H, contours, fillValue):
     return img_mask
 
 def plotPolygons(imageId, nClass, xmax, ymin, W, H, fillValue):
-    polygonList = wkt_loads(df[(df.ImageId == imageId) & (df.ClassType == nClass)].MultipolygonWKT.values[0])
-
-    (perimeters, interiors) = getPolygonContours(polygonList, xmax, ymin, W, H)
-
-    mask = plotMask(W, H, (perimeters, interiors), fillValue)
+    vals = df[(df.ImageId == imageId) & (df.ClassType == nClass)].MultipolygonWKT.values
+    mask = None
+    if len(vals) > 0:
+        polygonList = wkt_loads(vals[0])
+        (perimeters, interiors) = getPolygonContours(polygonList, xmax, ymin, W, H)
+        mask = plotMask(W, H, (perimeters, interiors), fillValue)
+    else:
+        mask = plotMask(W, H, None, fillValue)
 
     return mask
 
@@ -190,6 +193,7 @@ def makeCombinedMask(imageId):
     return combinedMask
 
 processedDir = join(inDir, "three_band_processed")
+pngDir = join(inDir, "three_band_png")
 def processImage(imageId):
     combinedMask = makeCombinedMask(imageId)
     destDir = processedDir
@@ -209,6 +213,9 @@ def loadAll(imageId):
 
     rawImage = get_images(imageId, '3')['3']
     axesCorrectedImage = rawImage #np.transpose(rawImage, (1, 2, 0))
+    if not exists(pngDir):
+        makedirs(pngDir)
+    plt.imsave(join(pngDir, "{0}.png".format(imageId)), np.transpose(rawImage, (1, 2, 0)))
 
     return (axesCorrectedImage, mask)
 

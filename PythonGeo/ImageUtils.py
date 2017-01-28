@@ -5,6 +5,9 @@ import itertools
 
 import DataTools
 
+def showImg(img):
+    plt.imshow(np.transpose(img, (1, 2, 0)))
+
 def genNums(x):
     i = 0
     while i < x:

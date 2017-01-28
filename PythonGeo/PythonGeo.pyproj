@@ -40,10 +40,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SetEnvForGpu.py" />
-    <Compile Include="SimpleNet.py">
+    <Compile Include="SimpleNetworkTest.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SimpleNetworkTest.py">
+    <Compile Include="TrainUnet.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UNetTest.py">
