@@ -8,6 +8,17 @@ import DataTools
 def showImg(img):
     plt.imshow(np.transpose(img, (1, 2, 0)))
 
+def scale_percentile(matrix):
+    w, h, d = matrix.shape
+    matrix = np.reshape(matrix, [w * h, d]).astype(np.float64)
+    # Get 2nd and 98th percentile
+    mins = np.percentile(matrix, 1, axis=0)
+    maxs = np.percentile(matrix, 99, axis=0) - mins
+    matrix = (matrix - mins[None, :]) / maxs[None, :]
+    matrix = np.reshape(matrix, [w, h, d])
+    matrix = matrix.clip(0, 1)
+    return matrix
+
 def genNums(x):
     i = 0
     while i < x:

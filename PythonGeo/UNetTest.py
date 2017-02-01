@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import sklearn.preprocessing as prc
-import sklearn.cross_validation as scv
+import sklearn.model_selection as scv
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -27,17 +27,17 @@ nb_epoch = 12
 
 img_dim_x=200
 img_dim_y=200
-input_shape = (3,img_dim_y,img_dim_x)
+input_shape = (1,img_dim_y,img_dim_x)
 
 model = Models.getGnet(input_shape, nb_classes)
 
 testId = '6100_1_3'
 (img_i, mask) = DataTools.loadAll(testId)
-img = img_i.astype(float)
-img = prc.scale(img.reshape(-1, 1)).reshape(img_i.shape)
+img = np.mean(img_i, axis=0) #img_i.astype(float)
+img = prc.scale(img.reshape(-1, 1)).reshape((1,) + img.shape)
 
 gall = ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), 60)
-gg = itertools.islice(gall, 2000)
+gg = itertools.islice(gall, 200)
 (imgs, classes, masks) = ImageUtils.prepareDataSets(gall, img, mask)
 
 (x_train, x_cv, y_train, y_cv) = scv.train_test_split(imgs, masks, test_size=0.2)
@@ -50,7 +50,7 @@ y_train_cat = y_train_cat.reshape((y_train.shape[0], y_train.shape[1]*y_train.sh
 #model.fit(x_train, y_train_cat, nb_epoch=15, batch_size=11)
 
 # For GNet
-model.fit(x_train, y_train_cat, nb_epoch=10, batch_size=4)
+model.fit(x_train, y_train_cat, nb_epoch=3, batch_size=4)
 
 #trainBatchSize = 10
 #idx = 0
@@ -110,3 +110,18 @@ def getImageMask(img, model):
         mask_rez[y:(y+h), x:(x+h)] = rez_img[i]
 
     return mask_rez
+
+
+def scale_percentile(matrix):
+    w, h, d = matrix.shape
+    matrix = np.reshape(matrix, [w * h, d]).astype(np.float64)
+    # Get 2nd and 98th percentile
+    mins = np.percentile(matrix, 1, axis=0)
+    maxs = np.percentile(matrix, 99, axis=0) - mins
+    matrix = (matrix - mins[None, :]) / maxs[None, :]
+    matrix = np.reshape(matrix, [w, h, d])
+    matrix = matrix.clip(0, 1)
+    return matrix
+
+i2p = scale_percentile(i2)
+tiff.imshow(255*i2p)

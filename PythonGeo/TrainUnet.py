@@ -2,6 +2,8 @@ import SetEnvForGpu
 
 import itertools
 import logging
+from os.path import join, exists
+from os import makedirs
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,21 +26,21 @@ nb_epoch = 12
 
 img_dim_x=200
 img_dim_y=200
-input_shape = (3,img_dim_y,img_dim_x)
+input_shape = (1,img_dim_y,img_dim_x)
 
-epochs = 1
+epochs = 20
 batchSize = 4
 
 def loadImage(imageId):
     (img_i, mask) = DataTools.loadAll(imageId)
-    img = img_i.astype(float)
-    img = prc.scale(img.reshape(-1, 1)).reshape(img_i.shape)
+    img = np.mean(ImageUtils.scale_percentile(img_i), axis=0) #img_i.astype(float)
+    img = prc.scale(img.reshape(-1, 1)).reshape((1,) + img.shape)
     return (img, mask)
 
 def genPatches(img, mask):
     gall = ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), 60)
-    gg = itertools.islice(gall, 20)
-    (imgs, classes, masks) = ImageUtils.prepareDataSets(gg, img, mask)
+    #gg = itertools.islice(gall, 20)
+    (imgs, classes, masks) = ImageUtils.prepareDataSets(gall, img, mask)
     return (imgs, classes, masks)
 
 def trainOnImage(imageId, model):
@@ -70,4 +72,20 @@ model = Models.getGnet(input_shape, nb_classes)
 
 allTrainIds = DataTools.trainImageIds
 
+modelsPath = join(DataTools.inDir, "models")
+if not exists(modelsPath):
+    makedirs(modelsPath)
+
+# Test code - comment out
 trainOnImage("6100_1_3", model)
+model.save(join(modelsPath, "gnet_gray_test.hdf5".format(iteration)))
+
+trainImages = np.random.permutation(allTrainIds)[:7]
+
+logging.info("Training on images: {0}".format(trainImages))
+
+iteration = 0
+for imageId in trainImages:
+    trainOnImage(imageId, model)
+    model.save(join(modelsPath, "gnet_gray_it_{0}.hdf5".format(iteration)))
+    iteration += 1
