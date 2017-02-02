@@ -43,6 +43,9 @@
     <Compile Include="SimpleNetworkTest.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TestUnet.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TrainUnet.py">
       <SubType>Code</SubType>
     </Compile>

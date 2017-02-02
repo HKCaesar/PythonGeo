@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
+import sklearn.preprocessing as prc
 
 import DataTools
 
@@ -114,6 +115,12 @@ def prepareDataSets(patchesGen, imageData, mapData):
     #stackedMapDetailList = stackedMapDetailList.reshape((n, stackedMapDetailList.shape[0]//n) + stackedMapDetailList.shape[1:])
 
     return (stackedImgList, stackedMapList, stackedMapDetailList)
+
+def loadImage(imageId):
+    (img_i, mask) = DataTools.loadAll(imageId)
+    img = np.mean(scale_percentile(img_i), axis=0) #img_i.astype(float)
+    img = prc.scale(img.reshape(-1, 1)).reshape((1,) + img.shape)
+    return (img, mask)
 
 #testId = '6100_1_3'
 #(img, mask) = DataTools.loadAll(testId)

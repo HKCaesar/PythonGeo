@@ -31,30 +31,24 @@ input_shape = (1,img_dim_y,img_dim_x)
 epochs = 20
 batchSize = 4
 
-def loadImage(imageId):
-    (img_i, mask) = DataTools.loadAll(imageId)
-    img = np.mean(ImageUtils.scale_percentile(img_i), axis=0) #img_i.astype(float)
-    img = prc.scale(img.reshape(-1, 1)).reshape((1,) + img.shape)
-    return (img, mask)
-
 def genPatches(img, mask):
     gall = ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), 60)
     #gg = itertools.islice(gall, 20)
     (imgs, classes, masks) = ImageUtils.prepareDataSets(gall, img, mask)
     return (imgs, classes, masks)
 
-def trainOnImage(imageId, model):
+def trainOnImage(imageId, model, cbs):
 
     logging.info("Training on image: {0}".format(imageId))
 
-    (img, mask) = loadImage(imageId)
+    (img, mask) = ImageUtils.loadImage(imageId)
     (imgs, classes, masks) = genPatches(img, mask)
 
     (x_train, x_cv, y_train, y_cv) = scv.train_test_split(imgs, masks, test_size=0.2)
     y_train_cat = np_utils.to_categorical(y_train.flatten(), nb_classes)
     y_train_cat = y_train_cat.reshape((y_train.shape[0], y_train.shape[1]*y_train.shape[2], nb_classes))
     
-    model.fit(x_train, y_train_cat, nb_epoch=epochs, batch_size=batchSize)
+    model.fit(x_train, y_train_cat, nb_epoch=epochs, batch_size=batchSize, callbacks = cbs)
 
     logging.info("Training completed, evaluating model")
 
@@ -76,8 +70,13 @@ modelsPath = join(DataTools.inDir, "models")
 if not exists(modelsPath):
     makedirs(modelsPath)
 
+checkpointer = ModelCheckpoint(filepath=join(modelsPath, "weights.{epoch:02d}-{val_loss:.2f}.hdf5"), verbose=1, save_best_only=True)
+csv_logger = CSVLogger('training.log')
+
+callbacks = [checkpointer, csv_logger]
+
 # Test code - comment out
-trainOnImage("6100_1_3", model)
+trainOnImage("6100_1_3", model, callbacks)
 model.save(join(modelsPath, "gnet_gray_test.hdf5".format(iteration)))
 
 trainImages = np.random.permutation(allTrainIds)[:7]
@@ -86,6 +85,6 @@ logging.info("Training on images: {0}".format(trainImages))
 
 iteration = 0
 for imageId in trainImages:
-    trainOnImage(imageId, model)
+    trainOnImage(imageId, model, callbacks)
     model.save(join(modelsPath, "gnet_gray_it_{0}.hdf5".format(iteration)))
     iteration += 1
