@@ -21,43 +21,46 @@ import Models
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, filename='TrainUnet.log')
 
-
 # Network params
-nb_classes = 11
-nb_epoch = 12
+class ModelParams(object):
+    pass
 
-img_dim_x=200
-img_dim_y=200
-input_shape = (1,img_dim_y,img_dim_x)
+mp = ModelParams()
 
-epochs = 20
-batchSize = 4
+mp.nb_classes = 11
 
-def genPatches(img, mask):
-    gall = ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), 60)
+mp.img_dim_x=200
+mp.img_dim_y=200
+mp.input_shape = (1,mp.img_dim_y,mp.img_dim_x)
+
+mp.epochs = 20
+mp.batchSize = 4
+
+def genPatches(img, mask, modelParams):
+    gall = ImageUtils.genPatches(img.shape[1:], (modelParams.img_dim_y, modelParams.img_dim_x), 60)
     #gg = itertools.islice(gall, 20)
     (imgs, classes, masks) = ImageUtils.prepareDataSets(gall, img, mask)
     return (imgs, classes, masks)
 
-def trainOnImage(imageId, model, cbs):
+def trainOnImage(imageId, model, cbs, modelParams):
 
     logging.info("Training on image: {0}".format(imageId))
 
     (img, mask) = ImageUtils.loadImage(imageId)
-    (imgs, classes, masks) = genPatches(img, mask)
+    (imgs, classes, masks) = genPatches(img, mask, modelParams)
 
     (x_train, x_cv, y_train, y_cv) = scv.train_test_split(imgs, masks, test_size=0.2)
-    y_train_cat = np_utils.to_categorical(y_train.flatten(), nb_classes)
-    y_train_cat = y_train_cat.reshape((y_train.shape[0], y_train.shape[1]*y_train.shape[2], nb_classes))
+    y_train_cat = np_utils.to_categorical(y_train.flatten(), modelParams.nb_classes)
+    y_train_cat = y_train_cat.reshape((y_train.shape[0], y_train.shape[1]*y_train.shape[2], nmodelParams.b_classes))
     
-    model.fit(x_train, y_train_cat, nb_epoch=epochs, batch_size=batchSize, callbacks = cbs)
+    model.fit(x_train, y_train_cat, nb_epoch=modelParams.epochs, batch_size=modelParams.batchSize, callbacks = cbs)
 
     logging.info("Training completed, evaluating model")
 
-    y_cv_cat = np_utils.to_categorical(y_cv.flatten(), nb_classes)
-    y_cv_cat = y_cv_cat.reshape((y_cv.shape[0], y_cv.shape[1]*y_cv.shape[2], nb_classes))
+    y_cv_cat = np_utils.to_categorical(y_cv.flatten(), modelParams.nb_classes)
+    y_cv_cat = y_cv_cat.reshape((y_cv.shape[0], y_cv.shape[1]*y_cv.shape[2], modelParams.nb_classes))
 
-    loss = model.evaluate(x_cv, y_cv_cat, batch_size=batchSize)
+    loss = model.evaluate(x_cv, y_cv_cat, batch_size=modelParams.batchSize)
 
     logging.info("Loss: {0}".format(str(loss)))
 

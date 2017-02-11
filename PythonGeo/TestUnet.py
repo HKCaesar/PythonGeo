@@ -22,36 +22,42 @@ import Models
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, filename='TrainUnet.log')
 
 # Network params
-nb_classes = 11
-nb_epoch = 12
+class ModelParams(object):
+    pass
 
-img_dim_x=200
-img_dim_y=200
-input_shape = (1,img_dim_y,img_dim_x)
+mp = ModelParams()
 
-epochs = 20
-batchSize = 4
+mp.nb_classes = 11
+mp.nb_epoch = 12
+
+mp.img_dim_x=200
+mp.img_dim_y=200
+mp.input_shape = (1,mp.img_dim_y,mp.img_dim_x)
+
+mp.epochs = 20
+mp.batchSize = 4
 
 modelsPath = join(DataTools.inDir, "models")
 
-model = load_model(join(modelsPath, "gnet_gray_test_1.hdf5"))
+model = load_model(join(modelsPath, "gnet_gray_test_3.hdf5"))
 
-def getImageMask(img, model):
-    gall_t = ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), img_dim_x)
+def getImageMask(img, model, modelParams, backgoungPenality, border):
+    gall_t = ImageUtils.genPatches(img.shape[1:], (modelParams.img_dim_y, modelParams.img_dim_x), modelParams.img_dim_x-border)
     (imgs_t, classes_t, _) = ImageUtils.prepareDataSets(gall_t, img, np.zeros(img.shape[1:]))
-    coords = [x for x in ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), img_dim_x)]
-    all_rez = model.predict(imgs_t, batch_size=batchSize)
+    coords = [x for x in ImageUtils.genPatches(img.shape[1:], (modelParams.img_dim_y-2*border, modelParams.img_dim_x-2*border),
+                                               modelParams.img_dim_x-2*border)]
+    all_rez = model.predict(imgs_t, batch_size=modelParams.batchSize)
 
     rez1 = np.array(all_rez)
-    rez1[:,:,0:1] *= 0.1
+    rez1[:,:,0:1] *= backgoungPenality
     rez_img = np.argmax(rez1, axis = 2)
-    rez_img = rez_img.reshape((-1, img_dim_y, img_dim_x))
+    rez_img = rez_img.reshape((-1, modelParams.img_dim_y, modelParams.img_dim_x))
 
     mask_rez = np.zeros(img.shape[1:])
 
     for i in range(len(coords)):
         (y, x, h, w) = coords[i]
-        mask_rez[y:(y+h), x:(x+h)] = rez_img[i]
+        mask_rez[y:(y+h), x:(x+h)] = rez_img[i][border:-border,border:-border]
 
     return mask_rez
 
@@ -60,7 +66,7 @@ imageId = "6100_1_3"
 (img, mask) = ImageUtils.loadImage(imageId)
 
 # Predict and save mask
-predMask = getImageMask(img, model)
+predMask = getImageMask(img, model, mp, 0.2, 5)
 plt.imsave(imageId + ".png", predMask)
 
 # Evaluate model
