@@ -34,16 +34,16 @@ batchSize = 4
 
 modelsPath = join(DataTools.inDir, "models")
 
-model = load_model(join(modelsPath, "gnet_gray_test.hdf5"))
+model = load_model(join(modelsPath, "gnet_gray_test_1.hdf5"))
 
 def getImageMask(img, model):
     gall_t = ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), img_dim_x)
     (imgs_t, classes_t, _) = ImageUtils.prepareDataSets(gall_t, img, np.zeros(img.shape[1:]))
     coords = [x for x in ImageUtils.genPatches(img.shape[1:], (img_dim_y, img_dim_x), img_dim_x)]
-    all_rez = model.predict(imgs_t, batch_size=4)
+    all_rez = model.predict(imgs_t, batch_size=batchSize)
 
     rez1 = np.array(all_rez)
-    rez1[:,:,0:1] *= 0.2
+    rez1[:,:,0:1] *= 0.1
     rez_img = np.argmax(rez1, axis = 2)
     rez_img = rez_img.reshape((-1, img_dim_y, img_dim_x))
 
@@ -55,7 +55,7 @@ def getImageMask(img, model):
 
     return mask_rez
 
-imageId = "6140_3_1"
+imageId = "6100_1_3"
 
 (img, mask) = ImageUtils.loadImage(imageId)
 

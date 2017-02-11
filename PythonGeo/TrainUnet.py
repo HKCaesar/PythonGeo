@@ -12,6 +12,8 @@ import sklearn.preprocessing as prc
 import sklearn.cross_validation as scv
 
 from keras.utils import np_utils
+from keras.models import load_model
+from keras.callbacks import ModelCheckpoint, CSVLogger
 
 import DataTools
 import ImageUtils
@@ -62,28 +64,35 @@ def trainOnImage(imageId, model, cbs):
     return model
 
 
-model = Models.getGnet(input_shape, nb_classes)
-
-allTrainIds = DataTools.trainImageIds
-
 modelsPath = join(DataTools.inDir, "models")
 if not exists(modelsPath):
     makedirs(modelsPath)
 
-checkpointer = ModelCheckpoint(filepath=join(modelsPath, "weights.{epoch:02d}-{val_loss:.2f}.hdf5"), verbose=1, save_best_only=True)
+#model = Models.getGnet(input_shape, nb_classes)
+model = load_model(join(modelsPath, "gnet_gray_test_3.hdf5"))
+
+allTrainIds = DataTools.trainImageIds
+trainImages =  ['6110_3_1', '6100_2_3', '6040_1_3', '6010_4_4', '6140_3_1',
+       '6110_1_2', '6060_2_3'] # np.random.permutation(allTrainIds)[:7]
+
+# '6040_1_3' - do not use
+# '6010_4_4' - do not use
+
+
+checkpointer = ModelCheckpoint(filepath=join(modelsPath, "weights.{epoch:02d}.hdf5"), verbose=1, save_best_only=True)
 csv_logger = CSVLogger('training.log')
 
 callbacks = [checkpointer, csv_logger]
 
-# Test code - comment out
-trainOnImage("6100_1_3", model, callbacks)
-model.save(join(modelsPath, "gnet_gray_test.hdf5".format(iteration)))
+iteration = 0
 
-trainImages = np.random.permutation(allTrainIds)[:7]
+# Test code - comment out
+trainOnImage("6110_1_2", model, callbacks)
+model.save(join(modelsPath, "gnet_gray_test_4.hdf5"))
 
 logging.info("Training on images: {0}".format(trainImages))
 
-iteration = 0
+
 for imageId in trainImages:
     trainOnImage(imageId, model, callbacks)
     model.save(join(modelsPath, "gnet_gray_it_{0}.hdf5".format(iteration)))
