@@ -51,7 +51,7 @@ def trainOnImage(imageId, model, cbs, modelParams):
 
     (x_train, x_cv, y_train, y_cv) = scv.train_test_split(imgs, masks, test_size=0.2)
     y_train_cat = np_utils.to_categorical(y_train.flatten(), modelParams.nb_classes)
-    y_train_cat = y_train_cat.reshape((y_train.shape[0], y_train.shape[1]*y_train.shape[2], nmodelParams.b_classes))
+    y_train_cat = y_train_cat.reshape((y_train.shape[0], y_train.shape[1]*y_train.shape[2], modelParams.nb_classes))
     
     model.fit(x_train, y_train_cat, nb_epoch=modelParams.epochs, batch_size=modelParams.batchSize, callbacks = cbs)
 
@@ -72,7 +72,7 @@ if not exists(modelsPath):
     makedirs(modelsPath)
 
 #model = Models.getGnet(input_shape, nb_classes)
-model = load_model(join(modelsPath, "gnet_gray_test_3.hdf5"))
+model = load_model(join(modelsPath, "gnet_gray_test_4.hdf5"))
 
 allTrainIds = DataTools.trainImageIds
 trainImages =  ['6110_3_1', '6100_2_3', '6040_1_3', '6010_4_4', '6140_3_1',
@@ -90,8 +90,8 @@ callbacks = [checkpointer, csv_logger]
 iteration = 0
 
 # Test code - comment out
-trainOnImage("6110_1_2", model, callbacks)
-model.save(join(modelsPath, "gnet_gray_test_4.hdf5"))
+trainOnImage("6060_2_3", model, callbacks, mp)
+model.save(join(modelsPath, "gnet_gray_test_5.hdf5"))
 
 logging.info("Training on images: {0}".format(trainImages))
 

@@ -46,6 +46,32 @@ def genPatches(imgShape, patchShape, stride):
         if startY + patchH >= imgH:
             break
 
+def genBorderPatches(imgShape, patchShape, stride):
+    (imgH, imgW) = imgShape
+    (patchH, patchW) = patchShape
+
+
+    # Yield right-side patches
+    (startY, startX) = (0, imgW - patchW -1)
+
+    for i in range(imgH // patchH):
+        patch = (startY + patchH*i, startX, patchH, patchW)
+        yield patch
+
+    # Yield bottom-side patches
+    (startY, startX) = (imgH - patchH - 1, 0)
+
+    cnt = imgW // patchW if imgH % patchH != 0 else (imgW // patchW) - 1 # Avoid doubling of bottom-right patch
+
+    for i in range(cnt):
+        patch = (startY, startX + patchW*i, patchH, patchW)
+        yield patch
+
+    # Yield bottom-right patch
+    if imgH % patchH != 0 and imgW % patchW != 0:
+        patch = (imgH - patchH - 1, imgW - patchW - 1, patchH, patchW)
+        yield patch
+
 def lenInPatches(imgShape, patchShape, stride):
     (imgH, imgW) = imgShape
     (patchH, patchW) = patchShape
