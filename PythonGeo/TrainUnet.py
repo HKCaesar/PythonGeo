@@ -33,7 +33,7 @@ mp.img_dim_x=200
 mp.img_dim_y=200
 mp.input_shape = (1,mp.img_dim_y,mp.img_dim_x)
 
-mp.epochs = 20
+mp.epochs = 40
 mp.batchSize = 4
 
 def genPatches(img, mask, modelParams):
@@ -71,8 +71,8 @@ modelsPath = join(DataTools.inDir, "models")
 if not exists(modelsPath):
     makedirs(modelsPath)
 
-#model = Models.getGnet(input_shape, nb_classes)
-model = load_model(join(modelsPath, "gnet_gray_test_4.hdf5"))
+#model = Models.getGnet(mp.input_shape, mp.nb_classes)
+model = load_model(join(modelsPath, "gnet_gray_test_5.hdf5"))
 
 allTrainIds = DataTools.trainImageIds
 trainImages =  ['6110_3_1', '6100_2_3', '6040_1_3', '6010_4_4', '6140_3_1',
@@ -82,7 +82,7 @@ trainImages =  ['6110_3_1', '6100_2_3', '6040_1_3', '6010_4_4', '6140_3_1',
 # '6010_4_4' - do not use
 
 
-checkpointer = ModelCheckpoint(filepath=join(modelsPath, "weights.{epoch:02d}.hdf5"), verbose=1, save_best_only=True)
+checkpointer = ModelCheckpoint(filepath="weights.{epoch:02d}.hdf5", verbose=1, save_best_only=True)
 csv_logger = CSVLogger('training.log')
 
 callbacks = [checkpointer, csv_logger]
@@ -90,8 +90,8 @@ callbacks = [checkpointer, csv_logger]
 iteration = 0
 
 # Test code - comment out
-trainOnImage("6060_2_3", model, callbacks, mp)
-model.save(join(modelsPath, "gnet_gray_test_5.hdf5"))
+trainOnImage("6110_3_1", model, callbacks, mp)
+model.save(join(modelsPath, "gnet_gray_test_6.hdf5"))
 
 logging.info("Training on images: {0}".format(trainImages))
 

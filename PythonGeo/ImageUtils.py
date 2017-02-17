@@ -148,6 +148,45 @@ def loadImage(imageId):
     img = prc.scale(img.reshape(-1, 1)).reshape((1,) + img.shape)
     return (img, mask)
 
+def getImageMask(img, model, modelParams, backgoungPenality, border):
+    gall_t = genPatches(img.shape[1:], (modelParams.img_dim_y, modelParams.img_dim_x), modelParams.img_dim_x-border)
+    (imgs_t, classes_t, _) = prepareDataSets(gall_t, img, np.zeros(img.shape[1:]))
+    coords = [x for x in genPatches(img.shape[1:], (modelParams.img_dim_y-2*border, modelParams.img_dim_x-2*border),
+                                               modelParams.img_dim_x-2*border)]
+    all_rez = model.predict(imgs_t, batch_size=modelParams.batchSize)
+
+    rez1 = np.array(all_rez)
+    rez1[:,:,0:1] *= backgoungPenality
+    rez_img = np.argmax(rez1, axis = 2)
+    rez_img = rez_img.reshape((-1, modelParams.img_dim_y, modelParams.img_dim_x))
+
+    mask_rez = np.zeros(img.shape[1:])
+
+    for i in range(len(coords)):
+        (y, x, h, w) = coords[i]
+        if border != 0:
+            mask_rez[y:(y+h), x:(x+h)] = rez_img[i][border:-border,border:-border]
+        else:
+            mask_rez[y:(y+h), x:(x+h)] = rez_img[i]
+
+    # Fill borders
+    borderPatches = genBorderPatches(img.shape[1:], (modelParams.img_dim_y, modelParams.img_dim_x), modelParams.img_dim_x)
+    (imgs_b, classes_b, _) = prepareDataSets(borderPatches, img, np.zeros(img.shape[1:]))
+    borderCoords = [x for x in genBorderPatches(img.shape[1:], (modelParams.img_dim_y, modelParams.img_dim_x), modelParams.img_dim_x)]
+
+    borderRez = model.predict(imgs_b, batch_size=modelParams.batchSize)
+    rez1 = np.array(borderRez)
+    rez1[:,:,0:1] *= backgoungPenality
+    rez_img = np.argmax(rez1, axis = 2)
+    rez_img = rez_img.reshape((-1, modelParams.img_dim_y, modelParams.img_dim_x))
+
+    for i in range(len(borderCoords)):
+        (y, x, h, w) = borderCoords[i]
+        mask_rez[y:(y+h), x:(x+h)] = rez_img[i]
+
+    return mask_rez
+
+
 #testId = '6100_1_3'
 #(img, mask) = DataTools.loadAll(testId)
 #gall = genPatches(img.shape[1:], (100, 100), 10)
