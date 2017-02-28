@@ -39,42 +39,12 @@ mp.batchSize = 4
 
 modelsPath = join(DataTools.inDir, "models")
 
-modelFileName = "gnet_gen_1"
-model = load_model(join(modelsPath, modelFileName + ".hdf5"))
-
-
-imageId = "6100_1_3"
-
-(img, mask) = ImageUtils.loadImage(imageId)
-
-# Predict and save mask
-predMask = ImageUtils.getImageMask(img, model, mp, 0.1, 0)
-plt.imsave(imageId + ".png", predMask)
-
-# Some visualizations
-layer_out = K.function([model.get_layer("input_1").input, K.learning_phase()],
-                       [model.get_layer("convolution2d_15").output])
-gall = ImageUtils.genPatches(img.shape[1:], (mp.img_dim_y, mp.img_dim_x), 60)
-gg = itertools.islice(gall, 20)
-(imgs, classes, masks) = ImageUtils.prepareDataSets(gg, img, mask)
-layer_out_img = layer_out([imgs, 0])[0]
-
 # Evaluate model
 def genPatches(img, mask, mp):
     gall = ImageUtils.genPatches(img.shape[1:], (mp.img_dim_y, mp.img_dim_x), 60)
     #gg = itertools.islice(gall, 20)
     (imgs, classes, masks) = ImageUtils.prepareDataSets(gall, img, mask)
     return (imgs, classes, masks)
-
-(imgs, classes, masks) = genPatches(img, mask, mp)
-
-x_test = imgs
-y_test = masks
-y_test_cat = np_utils.to_categorical(y_test.flatten(), mp.nb_classes)
-y_test_cat = y_test_cat.reshape((y_test.shape[0], y_test.shape[1]*y_test.shape[2], mp.nb_classes))
-
-model.evaluate(x_test, y_test_cat, batch_size = mp.batchSize)
-
 
 def evaluateOnImage(model, mp, imageId):
     (img, mask) = ImageUtils.loadImage(imageId)
@@ -115,16 +85,18 @@ def saveMap(filePath, map):
             f.write("{0},{1},{2}\n".format(imageId, loss, acc))
 
 modelsToTest = [
-    "gnet_gray_test_1",
-    "gnet_gray_test_2",
-    "gnet_gray_test_3",
-    "gnet_gray_test_4",
-    "gnet_gray_test_5",
-    "gnet_gray_test_6"
+#    "gnet_gray_test_1",
+#    "gnet_gray_test_2",
+#    "gnet_gray_test_3",
+#    "gnet_gray_test_4",
+#    "gnet_gray_test_5",
+#    "gnet_gray_test_6"
+    "unet_gray_test_1"
     ]
 
-for modelFileName in modelsToTest[:1]:
+for modelFileName in modelsToTest:
     model = load_model(join(modelsPath, modelFileName + ".hdf5"))
     logging.info("Loaded model: {0}".format(modelFileName))
-    map = evalOnList(model, mp, DataTools.trainImageIds[:3])
+    map = evalOnList(model, mp, DataTools.trainImageIds)
+    del model
     saveMap(join(modelsPath, modelFileName + "_eval.csv"), map)

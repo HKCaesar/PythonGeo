@@ -33,7 +33,7 @@ mp.img_dim_x=200
 mp.img_dim_y=200
 mp.input_shape = (1,mp.img_dim_y,mp.img_dim_x)
 
-mp.epochs = 40
+mp.epochs = 20
 mp.batchSize = 4
 
 def genPatches(img, mask, modelParams):
@@ -53,7 +53,8 @@ def trainOnImage(imageId, model, cbs, modelParams):
     y_train_cat = np_utils.to_categorical(y_train.flatten(), modelParams.nb_classes)
     y_train_cat = y_train_cat.reshape((y_train.shape[0], y_train.shape[1]*y_train.shape[2], modelParams.nb_classes))
     
-    model.fit(x_train, y_train_cat, nb_epoch=modelParams.epochs, batch_size=modelParams.batchSize, callbacks = cbs)
+    model.fit(x_train, y_train_cat, nb_epoch=modelParams.epochs, batch_size=modelParams.batchSize, callbacks = cbs,
+              validation_split=0.2)
 
     logging.info("Training completed, evaluating model")
 
@@ -71,8 +72,8 @@ modelsPath = join(DataTools.inDir, "models")
 if not exists(modelsPath):
     makedirs(modelsPath)
 
-#model = Models.getGnet(mp.input_shape, mp.nb_classes)
-model = load_model(join(modelsPath, "gnet_gray_test_5.hdf5"))
+model = Models.getUNet(mp.input_shape, mp.nb_classes)
+#model = load_model(join(modelsPath, "gnet_gray_test_5.hdf5"))
 
 allTrainIds = DataTools.trainImageIds
 trainImages =  ['6110_3_1', '6100_2_3', '6040_1_3', '6010_4_4', '6140_3_1',
@@ -82,7 +83,7 @@ trainImages =  ['6110_3_1', '6100_2_3', '6040_1_3', '6010_4_4', '6140_3_1',
 # '6010_4_4' - do not use
 
 
-checkpointer = ModelCheckpoint(filepath="weights.{epoch:02d}.hdf5", verbose=1, save_best_only=True)
+checkpointer = ModelCheckpoint(filepath="unet_weights.{epoch:02d}.hdf5", verbose=1, save_best_only=True)
 csv_logger = CSVLogger('training.log')
 
 callbacks = [checkpointer, csv_logger]
@@ -91,7 +92,7 @@ iteration = 0
 
 # Test code - comment out
 trainOnImage("6110_3_1", model, callbacks, mp)
-model.save(join(modelsPath, "gnet_gray_test_6.hdf5"))
+model.save(join(modelsPath, "unet_gray_test_1.hdf5"))
 
 logging.info("Training on images: {0}".format(trainImages))
 

@@ -36,6 +36,9 @@
     <Compile Include="Models.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PerfTest.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sandbox.py">
       <SubType>Code</SubType>
     </Compile>
@@ -44,6 +47,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TestUnet.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TrainGen.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TrainUnet.py">

@@ -87,7 +87,7 @@ def getUNet(input_shape, nb_classes):
     model = Model(input=inputs, output=conv7)
 
     # sgd = SGD(lr=0.01, decay=1e-6, momentum=0.3, nesterov=False)
-    model.compile(optimizer='sgd', loss='categorical_crossentropy',metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
 
     return model
 
