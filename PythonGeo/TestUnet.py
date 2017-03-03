@@ -4,6 +4,7 @@ import itertools
 import logging
 from os.path import join, exists
 from os import makedirs
+import collections
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -50,6 +51,27 @@ imageId = "6100_1_3"
 # Predict and save mask
 predMask = ImageUtils.getImageMask(img, model, mp, 0.1, 0)
 plt.imsave(imageId + ".png", predMask)
+
+def plotClasses(predMask, mask, modelParams):
+    # Count predictions
+    cc = collections.Counter(predMask.flatten().astype(int))
+    ccm = collections.Counter(mask.flatten())
+
+    ind = np.arange(modelParams.nb_classes)     # the x locations for the groups
+    width = 0.4                                # the width of the bars
+
+    fig, ax = plt.subplots()
+    predVals = [cc[i] for i in ind]
+    rects1 = ax.bar(ind, predVals, width, color='r')
+    maskVals = [ccm[i] for i in ind]
+    rects2 = ax.bar(ind + width, maskVals, width, color='y')
+
+    ax.set_title('Classes in predicted vs ground truth')
+    ax.legend((rects1[0], rects2[0]), ('Predicted', 'Baseline'))
+
+    plt.show()
+
+plotClasses(predMask, mask, mp)
 
 # Some visualizations
 layer_out = K.function([model.get_layer("input_1").input, K.learning_phase()],
