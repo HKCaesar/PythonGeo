@@ -40,11 +40,11 @@ mp.batchSize = 4
 
 modelsPath = join(DataTools.inDir, "models")
 
-modelFileName = "gnet_gen_1"
+modelFileName = "gnet_gen_f_2"
 model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
 
-imageId = "6100_1_3"
+imageId = "6070_2_3"
 
 (img, mask) = ImageUtils.loadImage(imageId)
 
@@ -88,14 +88,14 @@ def genPatches(img, mask, mp):
     (imgs, classes, masks) = ImageUtils.prepareDataSets(gall, img, mask)
     return (imgs, classes, masks)
 
-(imgs, classes, masks) = genPatches(img, mask, mp)
+#(imgs, classes, masks) = genPatches(img, mask, mp)
 
-x_test = imgs
-y_test = masks
-y_test_cat = np_utils.to_categorical(y_test.flatten(), mp.nb_classes)
-y_test_cat = y_test_cat.reshape((y_test.shape[0], y_test.shape[1]*y_test.shape[2], mp.nb_classes))
+#x_test = imgs
+#y_test = masks
+#y_test_cat = np_utils.to_categorical(y_test.flatten(), mp.nb_classes)
+#y_test_cat = y_test_cat.reshape((y_test.shape[0], y_test.shape[1]*y_test.shape[2], mp.nb_classes))
 
-model.evaluate(x_test, y_test_cat, batch_size = mp.batchSize)
+#model.evaluate(x_test, y_test_cat, batch_size = mp.batchSize)
 
 
 def evaluateOnImage(model, mp, imageId):

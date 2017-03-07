@@ -43,14 +43,57 @@ def genPatches(img, mask, modelParams):
     (imgs, classes, masks) = ImageUtils.prepareDataSets(gall, img, mask)
     return (imgs, classes, masks)
 
-def generateData():
+def generateSamples(trainImages, modelParams):
     while True:
         # Choose an image
-        idx = np.random.randint(0, len(DataTools.trainImageIds))
-        logging.info("Loading image: {0}".format(DataTools.trainImageIds[idx]))
-        (img, mask) = ImageUtils.loadImage("6110_3_1") #(DataTools.trainImageIds[idx])
+        idx = np.random.randint(0, len(trainImages))
+        logging.info("Loading image: {0}".format(trainImages[idx]))
+        (img, mask) = ImageUtils.loadImage(trainImages[idx])
 
-        # Read 100 patches
+        # Make patches
+        (imgs, classes, masks) = genPatches(img, mask, modelParams)
+
+        nSamples = imgs.shape[0]
+        idxs = np.random.permutation(np.arange(nSamples))[:modelParams.samples]
+        logging.info("Subsamples: {0}".format(idxs))
+
+        for i in range(modelParams.samples):
+            yield (imgs[idxs[i]], masks[idxs[i]])
+
+def batchSamples(samples, modelParams):
+    while True:
+        imgsBuff = np.zeros((modelParams.batchSize,) + modelParams.input_shape)
+        masksBuff = np.zeros((modelParams.batchSize,) + modelParams.input_shape[1:])
+
+        batchIter = itertools.islice(samples, modelParams.batchSize)
+
+        for i in range(modelParams.batchSize):
+            (img, mask) = next(batchIter)
+            imgsBuff[i] = img
+            masksBuff[i] = mask
+
+        x_train = imgsBuff
+        y_train_cat = np_utils.to_categorical(masksBuff.flatten(), mp.nb_classes)
+        y_train_cat = y_train_cat.reshape((masksBuff.shape[0], masksBuff.shape[1]*masksBuff.shape[2], mp.nb_classes)) # ? Check correctness here ?
+
+        yield (x_train, y_train_cat)
+
+def checkSample(sample):
+    (img, mask) = sample
+    uniqueValues = np.unique(mask)
+    if len(uniqueValues) < 3:
+        return False
+
+    return True
+
+def generateData(trainImages):
+    while True:
+        # Choose an image
+        idx = np.random.randint(0, len(trainImages))
+        logging.info("Loading image: {0}".format(trainImages[idx]))
+        (img, mask) = ImageUtils.loadImage("6110_3_1") #(trainImages[idx])
+
+        # Make patches
         (imgs, classes, masks) = genPatches(img, mask, mp)
     
         # Shuffle
@@ -73,17 +116,26 @@ def generateData():
 
 #xx = [i for i in itertools.islice(generateData(), 1)]
 
-model = Models.getGnet(mp.input_shape, mp.nb_classes)
+modelsPath = join(DataTools.inDir, "models")
+if not exists(modelsPath):
+    makedirs(modelsPath)
+
+#model = Models.getGnet(mp.input_shape, mp.nb_classes)
+
+modelFileName = "gnet_gen_f_1"
+model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
 checkpointer = ModelCheckpoint(filepath="unet_weights.{epoch:02d}.hdf5", verbose=1, save_best_only=True)
 csv_logger = CSVLogger('training.log')
 callbacks = [checkpointer, csv_logger]
 
-modelsPath = join(DataTools.inDir, "models")
-if not exists(modelsPath):
-    makedirs(modelsPath)
 
-h = model.fit_generator(generateData(), samples_per_epoch = 2000, nb_epoch = 20, verbose = True, callbacks = callbacks)
+# Prepare generator
+sampleGen = generateSamples(["6100_1_3", "6100_2_2", "6100_2_3", "6110_1_2"], mp)
 
+filteredSamples = filter(checkSample, sampleGen)
+batchedSamples = batchSamples(filteredSamples, mp)
 
-model.save(join(modelsPath, "gnet_gen_1.hdf5"))
+h = model.fit_generator(batchedSamples, samples_per_epoch = 2000, nb_epoch = 20, verbose = True, callbacks = callbacks)
+
+model.save(join(modelsPath, "gnet_gen_f_2.hdf5"))
