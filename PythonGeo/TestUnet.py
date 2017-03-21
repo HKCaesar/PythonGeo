@@ -8,6 +8,7 @@ import collections
 
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
 
 import sklearn.preprocessing as prc
 import sklearn.model_selection as scv
@@ -40,17 +41,23 @@ mp.batchSize = 4
 
 modelsPath = join(DataTools.inDir, "models")
 
-modelFileName = "gnet_gen_f_2"
+modelFileName = "gnet_gauss_1"
 model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
 
-imageId = "6070_2_3"
+imageId = "6110_1_2"
 
 (img, mask) = ImageUtils.loadImage(imageId)
 
+img_blur = cv2.GaussianBlur(img.reshape(img.shape[1:]), (5,5), 0).reshape(img.shape)
+#img_blur = cv2.bilateralFilter(img.reshape(img.shape[1:]), 3, 5, 10).reshape(img.shape)
+
 # Predict and save mask
-predMask = ImageUtils.getImageMask(img, model, mp, 0.1, 0)
+predMask = ImageUtils.getImageMask(img, model, mp, 0.2, 0)
 plt.imsave(imageId + ".png", predMask)
+
+predMask_blur = ImageUtils.getImageMask(img_blur, model, mp, 0.2, 0)
+
 
 def plotClasses(predMask, mask, modelParams):
     # Count predictions
@@ -72,6 +79,7 @@ def plotClasses(predMask, mask, modelParams):
     plt.show()
 
 plotClasses(predMask, mask, mp)
+plotClasses(predMask_blur, mask, mp)
 
 # Some visualizations
 layer_out = K.function([model.get_layer("input_1").input, K.learning_phase()],
@@ -97,6 +105,17 @@ def genPatches(img, mask, mp):
 
 #model.evaluate(x_test, y_test_cat, batch_size = mp.batchSize)
 
+def evaluateLoaded(model, mp, img, mask):
+    (imgs, classes, masks) = genPatches(img, mask, mp)
+
+    x_test = imgs
+    y_test = masks
+    y_test_cat = np_utils.to_categorical(y_test.flatten(), mp.nb_classes)
+    y_test_cat = y_test_cat.reshape((y_test.shape[0], y_test.shape[1]*y_test.shape[2], mp.nb_classes))
+
+    return model.evaluate(x_test, y_test_cat, batch_size = mp.batchSize)
+
+evalRez = evaluateLoaded(model, mp, img_blur, mask)
 
 def evaluateOnImage(model, mp, imageId):
     (img, mask) = ImageUtils.loadImage(imageId)

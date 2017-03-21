@@ -14,6 +14,8 @@ from keras.utils import np_utils
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, CSVLogger
 
+import cv2
+
 import DataTools
 import ImageUtils
 import Models
@@ -49,6 +51,8 @@ def generateSamples(trainImages, modelParams):
         idx = np.random.randint(0, len(trainImages))
         logging.info("Loading image: {0}".format(trainImages[idx]))
         (img, mask) = ImageUtils.loadImage(trainImages[idx])
+
+        img = cv2.GaussianBlur(img.reshape(img.shape[1:]), (5,5), 0).reshape(img.shape)
 
         # Make patches
         (imgs, classes, masks) = genPatches(img, mask, modelParams)
@@ -120,10 +124,10 @@ modelsPath = join(DataTools.inDir, "models")
 if not exists(modelsPath):
     makedirs(modelsPath)
 
-#model = Models.getGnet(mp.input_shape, mp.nb_classes)
+model = Models.getGnet(mp.input_shape, mp.nb_classes)
 
-modelFileName = "gnet_gen_f_1"
-model = load_model(join(modelsPath, modelFileName + ".hdf5"))
+#modelFileName = "gnet_gen_f_6"
+#model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
 checkpointer = ModelCheckpoint(filepath="unet_weights.{epoch:02d}.hdf5", verbose=1, save_best_only=True)
 csv_logger = CSVLogger('training.log')
@@ -136,6 +140,6 @@ sampleGen = generateSamples(["6100_1_3", "6100_2_2", "6100_2_3", "6110_1_2"], mp
 filteredSamples = filter(checkSample, sampleGen)
 batchedSamples = batchSamples(filteredSamples, mp)
 
-h = model.fit_generator(batchedSamples, samples_per_epoch = 2000, nb_epoch = 20, verbose = True, callbacks = callbacks)
+h = model.fit_generator(batchedSamples, samples_per_epoch = 2000, nb_epoch = 25, verbose = True, callbacks = callbacks)
 
-model.save(join(modelsPath, "gnet_gen_f_2.hdf5"))
+model.save(join(modelsPath, "gnet_gauss_1.hdf5"))

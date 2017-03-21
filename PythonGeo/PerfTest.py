@@ -85,13 +85,8 @@ def saveMap(filePath, map):
             f.write("{0},{1},{2}\n".format(imageId, loss, acc))
 
 modelsToTest = [
-#    "gnet_gray_test_1",
-#    "gnet_gray_test_2",
-#    "gnet_gray_test_3",
-#    "gnet_gray_test_4",
-#    "gnet_gray_test_5",
-#    "gnet_gray_test_6"
-    "unet_gray_test_1"
+    "gnet_gen_f_5",
+    "gnet_gen_f_6"
     ]
 
 for modelFileName in modelsToTest:
