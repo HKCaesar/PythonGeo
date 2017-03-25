@@ -45,7 +45,7 @@ modelFileName = "gnet_gauss_1"
 model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
 
-imageId = "6110_1_2"
+imageId = "6070_2_3"
 
 (img, mask) = ImageUtils.loadImage(imageId)
 
@@ -57,7 +57,7 @@ predMask = ImageUtils.getImageMask(img, model, mp, 0.2, 0)
 plt.imsave(imageId + ".png", predMask)
 
 predMask_blur = ImageUtils.getImageMask(img_blur, model, mp, 0.2, 0)
-
+plt.imsave(imageId + "_blur.png", predMask_blur)
 
 def plotClasses(predMask, mask, modelParams):
     # Count predictions

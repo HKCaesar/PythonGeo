@@ -40,7 +40,7 @@ mp.batchSize = 4
 mp.samples = 100
 
 def genPatches(img, mask, modelParams):
-    gall = ImageUtils.genPatches(img.shape[1:], (modelParams.img_dim_y, modelParams.img_dim_x), 60)
+    gall = ImageUtils.genPatches(img.shape[1:], (modelParams.img_dim_y, modelParams.img_dim_x), 47)
     #gg = itertools.islice(gall, nbSamples)
     (imgs, classes, masks) = ImageUtils.prepareDataSets(gall, img, mask)
     return (imgs, classes, masks)
@@ -124,10 +124,10 @@ modelsPath = join(DataTools.inDir, "models")
 if not exists(modelsPath):
     makedirs(modelsPath)
 
-model = Models.getGnet(mp.input_shape, mp.nb_classes)
+#model = Models.getGnet(mp.input_shape, mp.nb_classes)
 
-#modelFileName = "gnet_gen_f_6"
-#model = load_model(join(modelsPath, modelFileName + ".hdf5"))
+modelFileName = "gnet_gauss_1"
+model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
 checkpointer = ModelCheckpoint(filepath="unet_weights.{epoch:02d}.hdf5", verbose=1, save_best_only=True)
 csv_logger = CSVLogger('training.log')
@@ -142,4 +142,4 @@ batchedSamples = batchSamples(filteredSamples, mp)
 
 h = model.fit_generator(batchedSamples, samples_per_epoch = 2000, nb_epoch = 25, verbose = True, callbacks = callbacks)
 
-model.save(join(modelsPath, "gnet_gauss_1.hdf5"))
+model.save(join(modelsPath, "gnet_gauss_2.hdf5"))
