@@ -51,7 +51,7 @@ def evaluateOnImage(model, mp, imageId):
     (imgs, classes, masks) = genPatches(img, mask, mp)
     x_test = imgs
     y_test = masks
-    y_test_cat = np_utils.to_categorical(y_test.flatten(), mp.nb_classes)
+    y_test_cat = DataTools.myToCategorical(y_test.flatten(), mp.nb_classes)
     y_test_cat = y_test_cat.reshape((y_test.shape[0], y_test.shape[1]*y_test.shape[2], mp.nb_classes))
 
     rez = model.evaluate(x_test, y_test_cat, batch_size = mp.batchSize)

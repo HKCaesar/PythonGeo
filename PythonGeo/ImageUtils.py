@@ -148,15 +148,18 @@ def loadImage(imageId):
     img = prc.scale(img.reshape(-1, 1)).reshape((1,) + img.shape)
     return (img, mask)
 
-def getImageMask(img, model, modelParams, backgoungPenality, border):
+def getRawPredictions(img, model, modelParams, border):
     gall_t = genPatches(img.shape[1:], (modelParams.img_dim_y, modelParams.img_dim_x), modelParams.img_dim_x-border)
     (imgs_t, classes_t, _) = prepareDataSets(gall_t, img, np.zeros(img.shape[1:]))
     coords = [x for x in genPatches(img.shape[1:], (modelParams.img_dim_y-2*border, modelParams.img_dim_x-2*border),
                                                modelParams.img_dim_x-2*border)]
     all_rez = model.predict(imgs_t, batch_size=modelParams.batchSize)
+    return (all_rez,coords)
+
+def getImageMask(img, model, modelParams, border):
+    (all_rez,coords) = getRawPredictions(img, model, modelParams, border)
 
     rez1 = np.array(all_rez)
-    rez1[:,:,0:1] *= backgoungPenality
     rez_img = np.argmax(rez1, axis = 2)
     rez_img = rez_img.reshape((-1, modelParams.img_dim_y, modelParams.img_dim_x))
 
@@ -176,7 +179,6 @@ def getImageMask(img, model, modelParams, backgoungPenality, border):
 
     borderRez = model.predict(imgs_b, batch_size=modelParams.batchSize)
     rez1 = np.array(borderRez)
-    rez1[:,:,0:1] *= backgoungPenality
     rez_img = np.argmax(rez1, axis = 2)
     rez_img = rez_img.reshape((-1, modelParams.img_dim_y, modelParams.img_dim_x))
 

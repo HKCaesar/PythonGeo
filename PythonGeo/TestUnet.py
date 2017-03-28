@@ -29,7 +29,7 @@ class ModelParams(object):
 
 mp = ModelParams()
 
-mp.nb_classes = 11
+mp.nb_classes = 10
 mp.nb_epoch = 12
 
 mp.img_dim_x=200
@@ -41,22 +41,24 @@ mp.batchSize = 4
 
 modelsPath = join(DataTools.inDir, "models")
 
-modelFileName = "gnet_gauss_1"
+modelFileName = "gnet_newcat_1"
 model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
 
-imageId = "6070_2_3"
+imageId = "6110_1_2"
 
 (img, mask) = ImageUtils.loadImage(imageId)
 
 img_blur = cv2.GaussianBlur(img.reshape(img.shape[1:]), (5,5), 0).reshape(img.shape)
 #img_blur = cv2.bilateralFilter(img.reshape(img.shape[1:]), 3, 5, 10).reshape(img.shape)
 
+rawPred = ImageUtils.getRawPredictions(img, model, mp, 0)
+
 # Predict and save mask
-predMask = ImageUtils.getImageMask(img, model, mp, 0.2, 0)
+predMask = ImageUtils.getImageMask(img, model, mp, 0)
 plt.imsave(imageId + ".png", predMask)
 
-predMask_blur = ImageUtils.getImageMask(img_blur, model, mp, 0.2, 0)
+predMask_blur = ImageUtils.getImageMask(img_blur, model, mp, 0)
 plt.imsave(imageId + "_blur.png", predMask_blur)
 
 def plotClasses(predMask, mask, modelParams):
@@ -83,7 +85,7 @@ plotClasses(predMask_blur, mask, mp)
 
 # Some visualizations
 layer_out = K.function([model.get_layer("input_1").input, K.learning_phase()],
-                       [model.get_layer("convolution2d_15").output])
+                       [model.get_layer("convolution2d_2").output])
 gall = ImageUtils.genPatches(img.shape[1:], (mp.img_dim_y, mp.img_dim_x), 60)
 gg = itertools.islice(gall, 20)
 (imgs, classes, masks) = ImageUtils.prepareDataSets(gg, img, mask)

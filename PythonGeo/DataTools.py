@@ -219,6 +219,16 @@ def loadAll(imageId):
 
     return (axesCorrectedImage, mask)
 
+def myToCategorical(masksBuff, nb_classes):
+    categoricalTmp = np.zeros((masksBuff.shape[0],) + (masksBuff.shape[1]*masksBuff.shape[2],) + (nb_classes,))
+    (batchSize, maskRows, maskCols) = masksBuff.shape
+    for b in range(batchSize):
+        for c in range(maskCols):
+            for r in range(maskRows):
+                if masksBuff[b,r,c] > 0:
+                    categoricalTmp[b, c + r*maskCols, masksBuff[b,r,c]-1] = 1
+    return categoricalTmp
+
 # Experiment
 #testId = '6100_1_3'
 #df[(df.ImageId == testId) & (df.ClassType == 1)]

@@ -29,7 +29,7 @@ class ModelParams(object):
 
 mp = ModelParams()
 
-mp.nb_classes = 11
+mp.nb_classes = 10
 
 mp.img_dim_x=200
 mp.img_dim_y=200
@@ -52,7 +52,7 @@ def generateSamples(trainImages, modelParams):
         logging.info("Loading image: {0}".format(trainImages[idx]))
         (img, mask) = ImageUtils.loadImage(trainImages[idx])
 
-        img = cv2.GaussianBlur(img.reshape(img.shape[1:]), (5,5), 0).reshape(img.shape)
+        #img = cv2.GaussianBlur(img.reshape(img.shape[1:]), (5,5), 0).reshape(img.shape)
 
         # Make patches
         (imgs, classes, masks) = genPatches(img, mask, modelParams)
@@ -67,7 +67,7 @@ def generateSamples(trainImages, modelParams):
 def batchSamples(samples, modelParams):
     while True:
         imgsBuff = np.zeros((modelParams.batchSize,) + modelParams.input_shape)
-        masksBuff = np.zeros((modelParams.batchSize,) + modelParams.input_shape[1:])
+        masksBuff = np.zeros((modelParams.batchSize,) + modelParams.input_shape[1:], dtype='int8')
 
         batchIter = itertools.islice(samples, modelParams.batchSize)
 
@@ -77,8 +77,7 @@ def batchSamples(samples, modelParams):
             masksBuff[i] = mask
 
         x_train = imgsBuff
-        y_train_cat = np_utils.to_categorical(masksBuff.flatten(), mp.nb_classes)
-        y_train_cat = y_train_cat.reshape((masksBuff.shape[0], masksBuff.shape[1]*masksBuff.shape[2], mp.nb_classes)) # ? Check correctness here ?
+        y_train_cat = DataTools.myToCategorical(masksBuff, mp.nb_classes)
 
         yield (x_train, y_train_cat)
 
@@ -90,56 +89,28 @@ def checkSample(sample):
 
     return True
 
-def generateData(trainImages):
-    while True:
-        # Choose an image
-        idx = np.random.randint(0, len(trainImages))
-        logging.info("Loading image: {0}".format(trainImages[idx]))
-        (img, mask) = ImageUtils.loadImage("6110_3_1") #(trainImages[idx])
-
-        # Make patches
-        (imgs, classes, masks) = genPatches(img, mask, mp)
-    
-        # Shuffle
-        imgsBuff = np.zeros((mp.samples,) + imgs.shape[1:])
-        masksBuff = np.zeros((mp.samples,) + masks.shape[1:])
-
-        idxs = np.random.permutation(np.arange(imgs.shape[0]))[:mp.samples]
-        logging.info("Subsamples: {0}".format(idxs))
-        for i in range(len(idxs)):
-            imgsBuff[i] = imgs[idxs[i]]
-            masksBuff[i] = masks[idxs[i]]
-
-        x_train = imgsBuff
-        y_train_cat = np_utils.to_categorical(masksBuff.flatten(), mp.nb_classes)
-        y_train_cat = y_train_cat.reshape((masksBuff.shape[0], masksBuff.shape[1]*masksBuff.shape[2], mp.nb_classes)) # ? Check correctness here ?
-
-        # Feed to network
-        for i in range(x_train.shape[0]//mp.batchSize):
-            yield (x_train[i*mp.batchSize:(i+1)*mp.batchSize,:], y_train_cat[i*mp.batchSize:(i+1)*mp.batchSize,:])
-
-#xx = [i for i in itertools.islice(generateData(), 1)]
-
 modelsPath = join(DataTools.inDir, "models")
 if not exists(modelsPath):
     makedirs(modelsPath)
 
 #model = Models.getGnet(mp.input_shape, mp.nb_classes)
 
-modelFileName = "gnet_gauss_1"
+modelFileName = "gnet_newcat_1"
 model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
-checkpointer = ModelCheckpoint(filepath="unet_weights.{epoch:02d}.hdf5", verbose=1, save_best_only=True)
+checkpointer = ModelCheckpoint(filepath="gnet_weights.{epoch:02d}.hdf5", verbose=1, save_best_only=True)
 csv_logger = CSVLogger('training.log')
 callbacks = [checkpointer, csv_logger]
 
 
 # Prepare generator
 sampleGen = generateSamples(["6100_1_3", "6100_2_2", "6100_2_3", "6110_1_2"], mp)
-
 filteredSamples = filter(checkSample, sampleGen)
 batchedSamples = batchSamples(filteredSamples, mp)
 
-h = model.fit_generator(batchedSamples, samples_per_epoch = 2000, nb_epoch = 25, verbose = True, callbacks = callbacks)
+valSampleGen = generateSamples(["6100_1_3", "6100_2_2", "6100_2_3", "6110_1_2"], mp)
+valSamples = batchSamples(valSampleGen, mp)
 
-model.save(join(modelsPath, "gnet_gauss_2.hdf5"))
+h = model.fit_generator(batchedSamples, validation_data = valSamples, nb_val_samples = 500, samples_per_epoch = 2000, nb_epoch = 20, verbose = True, callbacks = callbacks)
+
+model.save(join(modelsPath, "gnet_newcat_2.hdf5"))
