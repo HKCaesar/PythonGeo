@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import sklearn.preprocessing as prc
-import sklearn.cross_validation as scv
+import sklearn.model_selection as scv
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
