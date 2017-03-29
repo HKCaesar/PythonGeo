@@ -41,7 +41,7 @@ mp.batchSize = 4
 
 modelsPath = join(DataTools.inDir, "models")
 
-modelFileName = "gnet_newcat_1"
+modelFileName = "gnet_newcat_2"
 model = load_model(join(modelsPath, modelFileName + ".hdf5"))
 
 
@@ -85,7 +85,7 @@ plotClasses(predMask_blur, mask, mp)
 
 # Some visualizations
 layer_out = K.function([model.get_layer("input_1").input, K.learning_phase()],
-                       [model.get_layer("convolution2d_2").output])
+                       [model.get_layer("convolution2d_7").output])
 gall = ImageUtils.genPatches(img.shape[1:], (mp.img_dim_y, mp.img_dim_x), 60)
 gg = itertools.islice(gall, 20)
 (imgs, classes, masks) = ImageUtils.prepareDataSets(gg, img, mask)

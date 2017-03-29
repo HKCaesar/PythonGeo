@@ -104,11 +104,11 @@ callbacks = [checkpointer, csv_logger]
 
 
 # Prepare generator
-sampleGen = generateSamples(["6100_1_3", "6100_2_2", "6100_2_3", "6110_1_2"], mp)
+sampleGen = generateSamples(DataTools.trainImageIds, mp)
 filteredSamples = filter(checkSample, sampleGen)
 batchedSamples = batchSamples(filteredSamples, mp)
 
-valSampleGen = generateSamples(["6100_1_3", "6100_2_2", "6100_2_3", "6110_1_2"], mp)
+valSampleGen = generateSamples(DataTools.trainImageIds, mp)
 valSamples = batchSamples(valSampleGen, mp)
 
 h = model.fit_generator(batchedSamples, validation_data = valSamples, nb_val_samples = 500, samples_per_epoch = 2000, nb_epoch = 20, verbose = True, callbacks = callbacks)
